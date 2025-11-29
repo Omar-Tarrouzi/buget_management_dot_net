@@ -1,0 +1,16 @@
+﻿@model App_de_gestion_de_buget_version2.Models.Category
+
+<h2>Modifier la catégorie</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="CategoryId" />
+
+    <div class="form-group">
+        <label>Nom de la catégorie</label>
+        <input asp-for="Nom" class="form-control" />
+        <span asp-validation-for="Nom" class="text-danger"></span>
+    </div>
+
+    <button class="btn btn-primary mt-3">Mettre à jour</button>
+    <a class="btn btn-secondary mt-3" href="/Categories">Annuler</a>
+</form>

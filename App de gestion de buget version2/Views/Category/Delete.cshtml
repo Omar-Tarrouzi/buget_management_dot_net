@@ -1,0 +1,11 @@
+﻿@model App_de_gestion_de_buget_version2.Models.Category
+
+<h2>Supprimer cette catégorie ?</h2>
+
+<p><strong>@Model.Nom</strong></p>
+
+<form method="post">
+    <input type="hidden" name="id" value="@Model.CategoryId" />
+    <button class="btn btn-danger">Supprimer</button>
+    <a href="/Category/Index" class="btn btn-secondary">Annuler</a>
+</form>

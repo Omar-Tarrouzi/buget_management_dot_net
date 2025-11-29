@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
 
-namespace App_de_gestion_de_buget_version2.Models;
-
-public partial class Goal
+namespace App_de_gestion_de_buget_version2.Models
 {
-    public int GoalId { get; set; }
+    public class Goal
+    {
+        public int GoalId { get; set; }
+        public string Titre { get; set; } = null!;
+        public decimal TargetAmount { get; set; }
+        public decimal? CurrentSaved { get; set; }
+        public DateTime Deadline { get; set; }
 
-    public string Titre { get; set; } = null!;
-
-    public decimal TargetAmount { get; set; }
-
-    public decimal? CurrentSaved { get; set; }
-
-    public DateTime Deadline { get; set; }
-
-    public int UserId { get; set; }
-
-    public virtual User User { get; set; } = null!;
+        // RELATION UTILISATEUR (string au lieu de int)
+        public string UserId { get; set; } = null!;
+        public IdentityUser User { get; set; } = null!;
+    }
 }
