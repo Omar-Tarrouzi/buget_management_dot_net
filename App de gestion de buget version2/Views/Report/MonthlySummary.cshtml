@@ -1,0 +1,34 @@
+@model App_de_gestion_de_buget_version2.Models.ViewModels.MonthlyBudgetSummaryViewModel
+
+@{
+    ViewData["Title"] = "Résumé mensuel";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Mois : @Model.Month / @Model.Year</p>
+
+<table class="table">
+    <tr>
+        <th>Budget prévu</th>
+        <td>@Model.PlannedAmount</td>
+    </tr>
+    <tr>
+        <th>Incomes</th>
+        <td>@Model.Incomes</td>
+    </tr>
+    <tr>
+        <th>Dépenses</th>
+        <td>@Model.Expenses</td>
+    </tr>
+    <tr>
+        <th>Reste</th>
+        <td>@Model.Remaining</td>
+    </tr>
+</table>
+
+<p>
+    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Retour</a>
+</p>
+
+

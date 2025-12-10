@@ -1,0 +1,50 @@
+@model App_de_gestion_de_buget_version2.Models.Transaction
+
+@{
+    ViewData["Title"] = "Créer une transaction";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" class="form-control" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label">Type</label>
+        <select asp-for="Type"
+                class="form-select"
+                asp-items="Html.GetEnumSelectList<TransactionType>()">
+        </select>
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Montant" class="form-label"></label>
+        <input asp-for="Montant" class="form-control" />
+        <span asp-validation-for="Montant" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label" asp-for="CategoryId">Catégorie</label>
+        <select asp-for="CategoryId" asp-items="ViewBag.CategoryId" class="form-select">
+            <option value="">-- Sélectionner --</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Retour</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

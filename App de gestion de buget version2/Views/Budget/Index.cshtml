@@ -1,0 +1,61 @@
+@model IEnumerable<App_de_gestion_de_buget_version2.Models.Budget>
+
+@{
+    ViewData["Title"] = "Budgets mensuels";
+    var monthNames = new[] { "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" };
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+        <a class="btn btn-primary" asp-action="SetBudget">Créer / Modifier un budget</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <h4 class="text-muted mb-3">Aucun budget défini</h4>
+                <p class="text-muted mb-4">Créez votre premier budget pour commencer à suivre vos dépenses</p>
+                <a class="btn btn-primary" asp-action="SetBudget">Créer un budget</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Mois</th>
+                            <th>Année</th>
+                            <th>Budget prévu</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model)
+                        {
+                            <tr>
+                                <td><strong>@monthNames[b.Month]</strong></td>
+                                <td>@b.Year</td>
+                                <td><span class="text-primary fw-bold">@b.PlannedAmount.ToString("C")</span></td>
+                                <td class="text-end">
+                                    <a class="btn btn-sm btn-secondary" asp-action="SetBudget" asp-route-id="@b.BudgetId">Modifier</a>
+                                    <a class="btn btn-sm btn-info" asp-action="ViewBudget" asp-route-year="@b.Year" asp-route-month="@b.Month">Voir budget</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <p class="mt-4">
+        <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Retour</a>
+    </p>
+</div>
+
+

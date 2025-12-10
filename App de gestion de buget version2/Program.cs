@@ -122,7 +122,7 @@ app.UseAuthorization();
 // Configuration des routes
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Wallet}/{action=Index}/{id?}");
 
 app.MapRazorPages();
 

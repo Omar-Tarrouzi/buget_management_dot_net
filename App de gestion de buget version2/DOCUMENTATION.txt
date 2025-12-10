@@ -1,0 +1,585 @@
+================================================================================
+DOCUMENTATION DE L'APPLICATION DE GESTION DE BUDGET
+================================================================================
+
+VERSION: 2.0
+DATE: Décembre 2025
+
+================================================================================
+TABLE DES MATIÈRES
+================================================================================
+
+1. Vue d'ensemble de l'application
+2. Architecture et structure du code
+3. Fonctionnalités principales
+4. Cas d'usage détaillés
+5. Description des composants
+6. Flux de données
+7. Gestion des revenus automatiques
+8. Système de budgets par catégorie
+9. Alertes et notifications
+
+================================================================================
+1. VUE D'ENSEMBLE DE L'APPLICATION
+================================================================================
+
+Cette application est un système de gestion de budget personnel développé en 
+ASP.NET Core MVC. Elle permet aux utilisateurs de :
+- Gérer leurs portefeuilles (wallets)
+- Enregistrer des transactions (revenus et dépenses)
+- Créer et gérer des catégories de dépenses
+- Définir des budgets mensuels globaux et par catégorie
+- Suivre automatiquement les revenus récurrents
+- Recevoir des alertes en cas de dépassement de budget
+- Visualiser leurs finances avec des graphiques interactifs
+
+================================================================================
+2. ARCHITECTURE ET STRUCTURE DU CODE
+================================================================================
+
+STRUCTURE DES DOSSIERS:
+-----------------------
+- Controllers/     : Contrôleurs MVC gérant la logique métier
+- Models/          : Modèles de données et ViewModels
+- Views/           : Vues Razor pour l'interface utilisateur
+- Data/            : Contexte Entity Framework Core
+- Migrations/      : Migrations de base de données
+- wwwroot/         : Fichiers statiques (CSS, JS, images)
+
+MODÈLES PRINCIPAUX:
+------------------
+1. Wallet          : Portefeuille utilisateur avec solde
+2. Transaction     : Transactions (revenus/dépenses) avec catégorie
+3. Category        : Catégories de dépenses
+4. Budget          : Budget mensuel global
+5. CategoryBudget  : Budget maximum par catégorie
+6. RecurringIncome : Revenus récurrents (ajoutés automatiquement)
+7. Salary          : Salaires ponctuels
+
+VIEWMODELS:
+-----------
+1. WalletDashboardViewModel    : Données pour le tableau de bord du wallet
+2. TransactionIndexViewModel   : Données pour la page des transactions
+3. MonthlyBudgetSummaryViewModel : Résumé mensuel du budget
+4. CategoryBreakdownViewModel  : Répartition par catégorie
+5. CategoryBudgetAlert          : Alertes de dépassement de budget
+
+================================================================================
+3. FONCTIONNALITÉS PRINCIPALES
+================================================================================
+
+A. GESTION DU PORTEFEUILLE (Wallet)
+------------------------------------
+- Affichage du solde actuel
+- Tableau de bord avec statistiques budgétaires
+- Indicateurs de santé financière
+- Graphique circulaire (pie chart) des dépenses par catégorie
+- Alertes de dépassement de budget
+
+B. GESTION DES TRANSACTIONS
+---------------------------
+- Création, modification, suppression de transactions
+- Filtrage par type (revenu/dépense)
+- Association avec des catégories
+- Graphique circulaire des dépenses par catégorie
+- Barres de progression colorées pour chaque catégorie
+
+C. GESTION DES BUDGETS
+----------------------
+- Budget mensuel global
+- Budget par catégorie (CategoryBudget)
+- Suivi de l'utilisation du budget
+- Alertes automatiques en cas de dépassement
+
+D. REVENUS AUTOMATIQUES
+-----------------------
+- Configuration de revenus récurrents
+- Ajout automatique tous les 30 jours
+- Mise à jour automatique du solde du wallet
+
+E. VISUALISATIONS
+----------------
+- Graphiques circulaires (Chart.js)
+- Barres de progression colorées
+- Indicateurs de santé budgétaire
+- Statistiques mensuelles
+
+================================================================================
+4. CAS D'USAGE DÉTAILLÉS
+================================================================================
+
+CAS D'USAGE 1: Création d'une transaction
+-----------------------------------------
+1. L'utilisateur accède à la page Transactions
+2. Clique sur "Créer une transaction"
+3. Remplit le formulaire (date, description, montant, type, catégorie)
+4. Soumet le formulaire
+5. Le TransactionController valide les données
+6. Crée la transaction dans la base de données
+7. Met à jour le solde du wallet automatiquement
+   - Si revenu : solde += montant
+   - Si dépense : solde -= montant
+8. Redirige vers la liste des transactions
+
+CODE CONCERNÉ:
+- Controllers/TransactionController.cs : Create() (POST)
+- Views/Transaction/Create.cshtml : Formulaire de création
+- Models/Transaction.cs : Modèle de données
+
+CAS D'USAGE 2: Ajout automatique de revenus récurrents
+-------------------------------------------------------
+1. L'utilisateur configure un revenu récurrent (RecurringIncome)
+2. À chaque chargement de la page Wallet, ProcessRecurringIncomes() est appelé
+3. Le système vérifie si 30 jours se sont écoulés depuis le dernier traitement
+4. Si oui, crée automatiquement une transaction de type Income
+5. Met à jour le solde du wallet
+6. Met à jour LastProcessedDate
+
+CODE CONCERNÉ:
+- Controllers/WalletController.cs : ProcessRecurringIncomes()
+- Models/RecurringIncome.cs : Modèle de revenu récurrent
+- La méthode est appelée dans WalletController.Index()
+
+CAS D'USAGE 3: Vérification des budgets par catégorie
+------------------------------------------------------
+1. L'utilisateur définit un budget maximum pour une catégorie (ex: Loisirs = 5000€)
+2. À chaque chargement du Wallet, CheckCategoryBudgets() est appelé
+3. Le système calcule les dépenses totales par catégorie pour le mois en cours
+4. Compare avec le budget maximum défini
+5. Si dépassement détecté :
+   - Crée une CategoryBudgetAlert
+   - Change le statut de santé du budget à "danger" (mauvais crédit)
+   - Affiche une alerte visuelle dans l'interface
+
+CODE CONCERNÉ:
+- Controllers/WalletController.cs : CheckCategoryBudgets()
+- Models/CategoryBudget.cs : Modèle de budget par catégorie
+- Models/ViewModels/CategoryBudgetAlert.cs : Modèle d'alerte
+- Views/Wallet/Index.cshtml : Affichage des alertes
+
+CAS D'USAGE 4: Visualisation des dépenses par catégorie
+--------------------------------------------------------
+1. L'utilisateur accède à la page Transactions
+2. Le TransactionController calcule la répartition par catégorie
+3. Affiche un graphique circulaire (Chart.js) avec les pourcentages
+4. Affiche un tableau avec barres de progression colorées
+5. Chaque catégorie a une couleur unique pour la visualisation
+
+CODE CONCERNÉ:
+- Controllers/TransactionController.cs : Index()
+- Views/Transaction/Index.cshtml : Section Scripts avec Chart.js
+- Les couleurs sont générées dynamiquement pour chaque catégorie
+
+CAS D'USAGE 5: Tableau de bord du Wallet
+----------------------------------------
+1. L'utilisateur accède à la page Wallet (page d'accueil)
+2. Le WalletController.Index() :
+   - Traite les revenus récurrents
+   - Calcule les statistiques du mois en cours
+   - Vérifie les budgets par catégorie
+   - Génère les alertes
+3. Affiche :
+   - Solde actuel
+   - Santé du budget (bon/attention/danger)
+   - Budget du mois avec barre de progression
+   - Taux d'épargne
+   - Statistiques budgétaires
+   - Graphique circulaire des dépenses par catégorie
+   - Alertes de dépassement
+
+CODE CONCERNÉ:
+- Controllers/WalletController.cs : Index()
+- Views/Wallet/Index.cshtml : Interface complète du tableau de bord
+
+================================================================================
+5. DESCRIPTION DES COMPOSANTS
+================================================================================
+
+A. WALLETCONTROLLER
+-------------------
+Responsable de la gestion du portefeuille et du tableau de bord.
+
+Méthodes principales:
+- Index() : Affiche le tableau de bord avec toutes les statistiques
+- ProcessRecurringIncomes() : Traite les revenus récurrents automatiquement
+- CheckCategoryBudgets() : Vérifie les dépassements de budget par catégorie
+
+Flux Index():
+1. Récupère le wallet de l'utilisateur
+2. Appelle ProcessRecurringIncomes() pour traiter les revenus automatiques
+3. Calcule les dépenses et revenus du mois en cours
+4. Récupère le budget mensuel
+5. Calcule le pourcentage d'utilisation du budget
+6. Détermine le statut de santé (good/warning/danger)
+7. Calcule le taux d'épargne
+8. Compte les mois avec budget et les mois dépassés
+9. Calcule la répartition par catégorie
+10. Appelle CheckCategoryBudgets() pour vérifier les alertes
+11. Si alertes détectées, change le statut à "danger"
+12. Retourne le WalletDashboardViewModel
+
+B. TRANSACTIONCONTROLLER
+------------------------
+Gère toutes les opérations sur les transactions.
+
+Méthodes principales:
+- Index() : Liste toutes les transactions avec statistiques
+- Create() : Crée une nouvelle transaction
+- Edit() : Modifie une transaction existante
+- Delete() : Supprime une transaction
+
+Flux Create() (POST):
+1. Valide les données du formulaire
+2. Récupère le wallet de l'utilisateur
+3. Assigne la transaction au wallet
+4. Ajoute la transaction à la base de données
+5. Met à jour le solde du wallet :
+   - Si Income : wallet.Balance += transaction.Montant
+   - Si Expense : wallet.Balance -= transaction.Montant
+6. Sauvegarde les changements
+7. Redirige vers la liste
+
+C. BUDGETCONTROLLER
+------------------
+Gère les budgets mensuels et leur visualisation.
+
+Méthodes principales:
+- Index() : Liste tous les budgets
+- SetBudget() : Crée ou modifie un budget
+- ViewBudget() : Affiche le détail d'un budget avec graphiques
+
+Flux ViewBudget():
+1. Récupère le budget pour le mois/année spécifiés
+2. Calcule les revenus (salaires + transactions de type Income)
+3. Calcule les dépenses (transactions de type Expense)
+4. Calcule la répartition par catégorie
+5. Retourne MonthlyBudgetSummaryViewModel avec toutes les données
+6. La vue affiche un graphique circulaire avec Chart.js
+
+D. APPLICATIONDBCONTEXT
+-----------------------
+Contexte Entity Framework Core pour l'accès à la base de données.
+
+DbSets:
+- Wallets
+- Transactions
+- Categories
+- Budgets
+- CategoryBudgets
+- RecurringIncomes
+- Salaries
+- MonthlyPayments
+- Goals
+
+Configuration:
+- Utilise SQL Server
+- Migrations automatiques au démarrage (Program.cs)
+- Relations configurées entre les entités
+
+E. VUES RAZOR
+-------------
+Les vues utilisent Razor pour générer le HTML dynamiquement.
+
+Structure typique d'une vue:
+- @model : Définit le type de modèle
+- Section HTML : Structure de la page
+- @foreach : Boucles pour afficher les données
+- @if : Conditions pour l'affichage conditionnel
+- @section Scripts : Scripts JavaScript (Chart.js, etc.)
+
+Vues principales:
+- Wallet/Index.cshtml : Tableau de bord principal
+- Transaction/Index.cshtml : Liste des transactions avec graphiques
+- Budget/ViewBudget.cshtml : Détail d'un budget avec graphique circulaire
+- Shared/_Layout.cshtml : Layout principal avec navigation
+
+F. CSS ET STYLING
+-----------------
+Fichier: wwwroot/css/site.css
+
+Caractéristiques:
+- Design moderne avec gradients
+- Variables CSS pour les couleurs
+- Animations de gradient en arrière-plan
+- Cards avec ombres et effets hover
+- Barres de progression stylisées
+- Design responsive
+
+G. JAVASCRIPT ET CHARTS
+-----------------------
+Bibliothèque: Chart.js (CDN)
+
+Utilisation:
+- Graphiques circulaires (doughnut/pie) pour les catégories
+- Couleurs dynamiques assignées à chaque catégorie
+- Tooltips interactifs avec montants et pourcentages
+- Légendes personnalisées
+
+================================================================================
+6. FLUX DE DONNÉES
+================================================================================
+
+FLUX LORS D'UNE CONNEXION:
+--------------------------
+1. Utilisateur se connecte (Identity)
+2. Redirigé vers Wallet/Index (route par défaut)
+3. WalletController.Index() est appelé
+4. ProcessRecurringIncomes() vérifie et ajoute les revenus automatiques
+5. Calculs des statistiques
+6. CheckCategoryBudgets() vérifie les dépassements
+7. WalletDashboardViewModel est créé
+8. Vue Wallet/Index.cshtml est rendue avec toutes les données
+9. Chart.js génère les graphiques côté client
+
+FLUX LORS D'UNE TRANSACTION:
+----------------------------
+1. Utilisateur crée une transaction
+2. TransactionController.Create() (POST) traite la requête
+3. Validation des données
+4. Création de l'entité Transaction
+5. Mise à jour du Wallet.Balance
+6. Sauvegarde en base de données
+7. Redirection vers Transaction/Index
+8. TransactionController.Index() calcule les statistiques
+9. Affiche la liste avec graphiques mis à jour
+
+FLUX DE REVENUS AUTOMATIQUES:
+------------------------------
+1. À chaque chargement de Wallet/Index
+2. ProcessRecurringIncomes() est appelé
+3. Récupère tous les RecurringIncome de l'utilisateur
+4. Pour chaque revenu récurrent :
+   - Calcule les jours écoulés depuis LastProcessedDate
+   - Si >= 30 jours :
+     * Calcule combien de périodes à traiter
+     * Pour chaque période :
+       - Crée une Transaction de type Income
+       - Met à jour wallet.Balance
+     * Met à jour LastProcessedDate
+5. Sauvegarde toutes les transactions créées
+
+================================================================================
+7. GESTION DES REVENUS AUTOMATIQUES
+================================================================================
+
+MODÈLE RECURRINGINCOME:
+-----------------------
+- RecurringIncomeId : Identifiant unique
+- Montant : Montant du revenu récurrent
+- StartDate : Date de début
+- LastProcessedDate : Date du dernier traitement (nullable)
+- Description : Description du revenu
+- WalletId : Référence au wallet
+- UserId : Référence à l'utilisateur
+
+LOGIQUE DE TRAITEMENT:
+----------------------
+La méthode ProcessRecurringIncomes() dans WalletController :
+
+1. Récupère tous les revenus récurrents de l'utilisateur
+2. Pour chaque revenu :
+   - lastProcessed = LastProcessedDate ?? StartDate
+   - daysSinceLastProcessed = (now - lastProcessed).TotalDays
+   - Si daysSinceLastProcessed >= 30 :
+     * periodsToProcess = (int)(daysSinceLastProcessed / 30)
+     * Pour i de 0 à periodsToProcess :
+       - processDate = lastProcessed + (30 * (i + 1)) jours
+       - Crée Transaction avec cette date
+       - wallet.Balance += Montant
+     * LastProcessedDate = now
+
+EXEMPLE:
+--------
+Revenu récurrent de 2000€ créé le 1er janvier 2025
+- 1er février : Transaction créée automatiquement, solde +2000€
+- 1er mars : Transaction créée automatiquement, solde +2000€
+- etc.
+
+Si l'utilisateur ne se connecte pas pendant 60 jours :
+- Au retour, 2 transactions seront créées (pour février et mars)
+
+================================================================================
+8. SYSTÈME DE BUDGETS PAR CATÉGORIE
+================================================================================
+
+MODÈLE CATEGORYBUDGET:
+---------------------
+- CategoryBudgetId : Identifiant unique
+- CategoryId : Référence à la catégorie
+- Year : Année
+- Month : Mois
+- MaxAmount : Montant maximum autorisé pour cette catégorie
+- UserId : Référence à l'utilisateur
+
+LOGIQUE DE VÉRIFICATION:
+------------------------
+La méthode CheckCategoryBudgets() dans WalletController :
+
+1. Récupère tous les CategoryBudget pour le mois en cours
+2. Pour chaque CategoryBudget :
+   - Trouve les dépenses de cette catégorie dans categoryBreakdown
+   - Si SpentAmount > MaxAmount :
+     * Calcule overAmount = SpentAmount - MaxAmount
+     * Calcule overPercentage = (overAmount / MaxAmount) * 100
+     * Crée une CategoryBudgetAlert
+3. Retourne la liste des alertes
+
+EXEMPLE:
+--------
+Budget défini : Loisirs = 5000€ maximum
+Dépenses réelles : 6000€
+- overAmount = 1000€
+- overPercentage = 20%
+- Alerte créée et affichée
+- Statut de santé du budget passe à "danger"
+
+AFFICHAGE DES ALERTES:
+---------------------
+Dans Views/Wallet/Index.cshtml :
+- Section dédiée avec fond rouge (border-danger)
+- Pour chaque alerte :
+  * Nom de la catégorie
+  * Budget alloué vs montant dépensé
+  * Montant et pourcentage de dépassement
+  * Barre de progression visuelle
+- Message d'avertissement sur le statut de crédit
+
+IMPACT SUR LE STATUT:
+---------------------
+Si au moins une catégorie dépasse son budget :
+- BudgetHealthStatus = "danger"
+- Message "Crédit mauvais" affiché
+- Pie chart reflète ce statut
+
+================================================================================
+9. ALERTES ET NOTIFICATIONS
+================================================================================
+
+TYPES D'ALERTES:
+---------------
+1. Alertes de dépassement de budget par catégorie
+   - Affichées dans Wallet/Index
+   - Fond rouge avec icône d'avertissement
+   - Détails complets du dépassement
+
+2. Alertes de santé budgétaire
+   - Bon (vert) : Utilisation <= 75%
+   - Attention (jaune) : Utilisation 75-90%
+   - Danger (rouge) : Utilisation > 90% ou catégorie dépassée
+
+3. Recommandations
+   - Messages contextuels selon le statut
+   - Conseils pour améliorer la gestion budgétaire
+
+SYSTÈME DE COULEURS:
+-------------------
+- Vert (#10b981) : Bon statut, revenus
+- Jaune/Orange (#f59e0b) : Attention requise
+- Rouge (#ef4444) : Danger, dépenses, dépassements
+- Bleu (#6366f1) : Informations, budgets
+- Violet (#8b5cf6) : Catégories dans les graphiques
+
+================================================================================
+10. BASE DE DONNÉES
+================================================================================
+
+TABLES PRINCIPALES:
+------------------
+- AspNetUsers : Utilisateurs (Identity)
+- Wallets : Portefeuilles
+- Transactions : Transactions (revenus/dépenses)
+- Categories : Catégories de dépenses
+- Budgets : Budgets mensuels globaux
+- CategoryBudgets : Budgets par catégorie
+- RecurringIncomes : Revenus récurrents
+- Salaries : Salaires ponctuels
+- MonthlyPayments : Paiements mensuels récurrents
+- Goals : Objectifs financiers
+
+RELATIONS:
+----------
+- Wallet -> User (Many-to-One)
+- Transaction -> Wallet (Many-to-One)
+- Transaction -> Category (Many-to-One, nullable)
+- Budget -> User (Many-to-One)
+- CategoryBudget -> User (Many-to-One)
+- CategoryBudget -> Category (Many-to-One)
+- RecurringIncome -> User (Many-to-One)
+- RecurringIncome -> Wallet (Many-to-One)
+
+MIGRATIONS:
+-----------
+Les migrations sont appliquées automatiquement au démarrage de l'application
+via le code dans Program.cs :
+- Vérifie les migrations en attente
+- Les applique automatiquement
+- Sinon, utilise EnsureCreated()
+
+================================================================================
+11. SÉCURITÉ ET AUTHENTIFICATION
+================================================================================
+
+AUTHENTIFICATION:
+----------------
+- Utilise ASP.NET Core Identity
+- Tous les contrôleurs sont protégés par [Authorize]
+- Chaque utilisateur ne voit que ses propres données
+- Filtrage par UserId dans toutes les requêtes
+
+SÉCURITÉ DES DONNÉES:
+--------------------
+- Validation des données côté serveur
+- Protection CSRF avec AntiForgeryToken
+- Filtrage des requêtes par UserId
+- Pas d'accès direct aux données d'autres utilisateurs
+
+================================================================================
+12. POINTS TECHNIQUES IMPORTANTS
+================================================================================
+
+GESTION DES NULLABLES:
+---------------------
+- Wallet.Balance est nullable (decimal?)
+- Utilisation de ?? 0m pour les valeurs par défaut
+- Vérifications null avant les opérations
+
+GESTION DES ERREURS:
+-------------------
+- Try-catch dans ProcessRecurringIncomes() pour gérer l'absence de table
+- Try-catch dans CheckCategoryBudgets() pour gérer l'absence de table
+- Logging des erreurs avec ILogger
+
+PERFORMANCE:
+-----------
+- Utilisation de Include() pour éviter les requêtes N+1
+- Calculs effectués une seule fois par requête
+- Graphiques générés côté client (Chart.js)
+
+RESPONSIVE DESIGN:
+-----------------
+- Utilisation de Bootstrap pour le responsive
+- Media queries dans le CSS
+- Graphiques adaptatifs (Chart.js responsive)
+
+================================================================================
+13. AMÉLIORATIONS FUTURES POSSIBLES
+================================================================================
+
+- Interface pour créer/gérer les RecurringIncomes
+- Interface pour créer/gérer les CategoryBudgets
+- Export des données en CSV/Excel
+- Rapports mensuels automatiques
+- Notifications par email
+- Application mobile
+- Multi-devises
+- Objectifs d'épargne avec suivi
+- Prédictions basées sur l'historique
+
+================================================================================
+FIN DE LA DOCUMENTATION
+================================================================================
+
+Pour toute question ou clarification, consultez le code source dans les
+fichiers mentionnés dans cette documentation.
+
+

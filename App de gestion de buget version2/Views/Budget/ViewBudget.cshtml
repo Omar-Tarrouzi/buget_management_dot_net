@@ -1,0 +1,217 @@
+@model App_de_gestion_de_buget_version2.Models.ViewModels.MonthlyBudgetSummaryViewModel
+
+@{
+    ViewData["Title"] = "Vue budget mensuel";
+    var monthNames = new[] { "", "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" };
+    var totalExpenses = Model.Expenses;
+    var budgetUsagePercent = Model.PlannedAmount > 0 ? (Model.Expenses / Model.PlannedAmount) * 100 : 0;
+}
+
+<div class="container-fluid">
+    <h2>@ViewData["Title"]</h2>
+    <p class="lead mb-4">@monthNames[Model.Month] @Model.Year</p>
+
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card">
+                <h3>Budget prévu</h3>
+                <div class="value text-primary">@Model.PlannedAmount.ToString("C")</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card">
+                <h3>Revenus</h3>
+                <div class="value text-success">@Model.Incomes.ToString("C")</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card">
+                <h3>Dépenses</h3>
+                <div class="value text-danger">@Model.Expenses.ToString("C")</div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="dashboard-card">
+                <h3>Budget restant</h3>
+                <div class="value @(Model.Remaining >= 0 ? "text-success" : "text-danger")">@Model.Remaining.ToString("C")</div>
+                <div class="budget-health">
+                    @if (budgetUsagePercent <= 75)
+                    {
+                        <span class="indicator good">✓ Bon</span>
+                    }
+                    else if (budgetUsagePercent <= 90)
+                    {
+                        <span class="indicator warning">⚠ Attention</span>
+                    }
+                    else
+                    {
+                        <span class="indicator danger">✗ Dépassé</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Utilisation du budget
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Utilisé: @budgetUsagePercent.ToString("F1")%</span>
+                            <span>@Model.Expenses.ToString("C") / @Model.PlannedAmount.ToString("C")</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar @(budgetUsagePercent <= 75 ? "bg-success" : budgetUsagePercent <= 90 ? "bg-warning" : "bg-danger")" 
+                                 role="progressbar" 
+                                 style="width: @(Math.Min(budgetUsagePercent, 100))%"
+                                 aria-valuenow="@budgetUsagePercent" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    Répartition par catégorie
+                </div>
+                <div class="card-body">
+                    @if (Model.CategoryBreakdown != null && Model.CategoryBreakdown.Any())
+                    {
+                        <div class="chart-container">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">Aucune dépense catégorisée pour ce mois</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.CategoryBreakdown != null && Model.CategoryBreakdown.Any())
+    {
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        Détails par catégorie
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Catégorie</th>
+                                    <th>Montant</th>
+                                    <th>Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CategoryBreakdown.OrderByDescending(x => x.Total))
+                                {
+                                    var percentage = totalExpenses > 0 ? (item.Total / totalExpenses) * 100 : 0;
+                                    <tr>
+                                        <td><strong>@item.CategoryName</strong></td>
+                                        <td>@item.Total.ToString("C")</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                                    <div class="progress-bar" 
+                                                         style="width: @percentage%"
+                                                         role="progressbar">
+                                                    </div>
+                                                </div>
+                                                <span>@percentage.ToString("F1")%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <p class="mt-4">
+        <a class="btn btn-outline-secondary" asp-action="Index">Retour</a>
+    </p>
+</div>
+
+@section Scripts {
+    @if (Model.CategoryBreakdown != null && Model.CategoryBreakdown.Any())
+    {
+        <script>
+            const totalExpenses = @totalExpenses;
+            const categoryData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                Model.CategoryBreakdown.Select(c => new { 
+                    label = c.CategoryName, 
+                    value = (double)c.Total,
+                    percentage = totalExpenses > 0 ? (double)((c.Total / totalExpenses) * 100) : 0
+                })
+            ));
+
+            // Generate colors for each category
+            const colors = [
+                '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981',
+                '#3b82f6', '#ef4444', '#14b8a6', '#f97316', '#a855f7',
+                '#06b6d4', '#84cc16', '#eab308', '#f43f5e', '#6366f1'
+            ];
+
+            const ctx = document.getElementById('categoryChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: categoryData.map(c => c.label),
+                        datasets: [{
+                            data: categoryData.map(c => c.value),
+                            backgroundColor: colors.slice(0, categoryData.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return label + ': ' + value.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' }) + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    }
+}
+
+

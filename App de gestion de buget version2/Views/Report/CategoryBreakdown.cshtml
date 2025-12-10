@@ -1,0 +1,33 @@
+@model App_de_gestion_de_buget_version2.Models.ViewModels.CategoryBreakdownViewModel
+
+@{
+    ViewData["Title"] = "Répartition par catégorie";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Mois : @Model.Month / @Model.Year</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Catégorie</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.CategoryName</td>
+            <td>@item.Total</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<p>
+    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Retour</a>
+</p>
+
+

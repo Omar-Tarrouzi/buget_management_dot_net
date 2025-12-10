@@ -1,0 +1,36 @@
+@model App_de_gestion_de_buget_version2.Models.Budget
+
+@{
+    ViewData["Title"] = "Définir le budget";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="SetBudget" method="post">
+    <input type="hidden" asp-for="BudgetId" />
+
+    <div class="mb-3">
+        <label asp-for="Year" class="form-label"></label>
+        <input asp-for="Year" class="form-control" />
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Month" class="form-label"></label>
+        <input asp-for="Month" class="form-control" />
+        <span asp-validation-for="Month" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="PlannedAmount" class="form-label"></label>
+        <input asp-for="PlannedAmount" class="form-control" />
+        <span asp-validation-for="PlannedAmount" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Retour</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+

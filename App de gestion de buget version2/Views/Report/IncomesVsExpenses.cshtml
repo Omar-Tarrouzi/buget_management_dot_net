@@ -1,0 +1,42 @@
+@model App_de_gestion_de_buget_version2.Models.ViewModels.MonthlyBudgetSummaryViewModel
+
+@{
+    ViewData["Title"] = "Incomes vs Dépenses";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Mois : @Model.Month / @Model.Year</p>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Incomes</div>
+            <div class="card-body">
+                <h3>@Model.Incomes</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Dépenses</div>
+            <div class="card-body">
+                <h3>@Model.Expenses</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Reste</div>
+            <div class="card-body">
+                <h3>@Model.Remaining</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p class="mt-3">
+    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Retour</a>
+</p>
+
+

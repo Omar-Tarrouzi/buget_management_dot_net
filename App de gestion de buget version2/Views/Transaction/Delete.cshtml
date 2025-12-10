@@ -1,0 +1,28 @@
+@model App_de_gestion_de_buget_version2.Models.Transaction
+
+@{
+    ViewData["Title"] = "Supprimer la transaction";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<h4>Êtes-vous sûr de vouloir supprimer cette transaction ?</h4>
+
+<dl class="row">
+    <dt class="col-sm-2">Date</dt>
+    <dd class="col-sm-10">@Model.Date?.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-2">Description</dt>
+    <dd class="col-sm-10">@Model.Description</dd>
+
+    <dt class="col-sm-2">Montant</dt>
+    <dd class="col-sm-10">@Model.Montant</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="TransactionId" />
+    <button type="submit" class="btn btn-danger">Supprimer</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Retour</a>
+</form>
+
+

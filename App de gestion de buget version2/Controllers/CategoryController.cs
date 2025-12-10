@@ -42,11 +42,14 @@ namespace App_de_gestion_de_buget_version2.Controllers
             // return an empty model to the view so tag helpers render correctly
             return View(new Category());
         }
-
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category category)
         {
+            ModelState.Remove("User");
+            ModelState.Remove("UserId");
+
             if (ModelState.IsValid)
             {
                 try
@@ -77,6 +80,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
             return View(category);
         }
 
+
         public IActionResult Edit(int id)
         {
             var userId = GetUserId();
@@ -92,6 +96,10 @@ namespace App_de_gestion_de_buget_version2.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Category category)
         {
+            // Ne pas valider les propriétés de navigation / UserId fournies par le client
+            ModelState.Remove("User");
+            ModelState.Remove("UserId");
+
             var userId = GetUserId();
             var existingCategory = _context.Categories
                                           .FirstOrDefault(c => c.CategoryId == category.CategoryId && c.UserId == userId);

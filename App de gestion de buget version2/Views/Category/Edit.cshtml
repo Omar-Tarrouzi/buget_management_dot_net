@@ -3,6 +3,8 @@
 <h2>Modifier la catégorie</h2>
 
 <form asp-action="Edit" method="post">
+    <div asp-validation-summary="All" class="text-danger"></div>
+
     <input type="hidden" asp-for="CategoryId" />
 
     <div class="form-group">
@@ -11,6 +13,6 @@
         <span asp-validation-for="Nom" class="text-danger"></span>
     </div>
 
-    <button class="btn btn-primary mt-3">Mettre à jour</button>
-    <a class="btn btn-secondary mt-3" href="/Categories">Annuler</a>
+    <button class="btn btn-primary mt-3" type="submit">Mettre à jour</button>
+    <a class="btn btn-secondary mt-3" asp-action="Index" asp-controller="Category">Retour</a>
 </form>

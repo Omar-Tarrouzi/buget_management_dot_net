@@ -1,0 +1,31 @@
+@model App_de_gestion_de_buget_version2.Models.Transaction
+
+@{
+    ViewData["Title"] = "Détails de la transaction";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<dl class="row">
+    <dt class="col-sm-2">Date</dt>
+    <dd class="col-sm-10">@Model.Date?.ToString("dd/MM/yyyy")</dd>
+
+    <dt class="col-sm-2">Description</dt>
+    <dd class="col-sm-10">@Model.Description</dd>
+
+    <dt class="col-sm-2">Type</dt>
+    <dd class="col-sm-10">@Model.Type</dd>
+
+    <dt class="col-sm-2">Montant</dt>
+    <dd class="col-sm-10">@Model.Montant</dd>
+
+    <dt class="col-sm-2">Catégorie</dt>
+    <dd class="col-sm-10">@Model.Category?.Nom</dd>
+</dl>
+
+<p>
+    <a class="btn btn-secondary" asp-action="Edit" asp-route-id="@Model.TransactionId">Modifier</a>
+    <a class="btn btn-outline-secondary" asp-action="Index">Retour</a>
+</p>
+
+
