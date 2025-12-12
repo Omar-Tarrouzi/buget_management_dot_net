@@ -7,7 +7,12 @@
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>@ViewData["Title"]</h2>
-        <a class="btn btn-primary" asp-action="Create">Créer une transaction</a>
+        <div>
+            <a class="btn btn-outline-dark me-2" asp-controller="DataExport" asp-action="Index">
+                <i class="bi bi-arrow-down-up"></i> Import / Export
+            </a>
+            <a class="btn btn-primary" asp-action="Create">Créer une transaction</a>
+        </div>
     </div>
 
     @if (Model.Transactions != null && Model.Transactions.Any())
@@ -102,6 +107,13 @@
         }
     }
 
+    <!-- PDF Export Controls -->
+    <div class="d-flex justify-content-end mb-3">
+        <button onclick="generatePDF()" class="btn btn-outline-primary">
+            <i class="bi bi-file-earmark-pdf"></i> Exporter la sélection en PDF
+        </button>
+    </div>
+
     @if (Model.Transactions == null || !Model.Transactions.Any())
     {
         <div class="card">
@@ -119,9 +131,10 @@
                 Liste des transactions
             </div>
             <div class="card-body">
-                <table class="table table-hover">
+                <table class="table table-hover" id="transactionsTable">
                     <thead>
                         <tr>
+                            <th width="40"><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
                             <th>Date</th>
                             <th>Description</th>
                             <th>Type</th>
@@ -134,6 +147,7 @@
                         @foreach (var item in Model.Transactions)
                         {
                             <tr>
+                                <td><input type="checkbox" class="transaction-checkbox" value="@item.TransactionId"></td>
                                 <td>@item.Date?.ToString("dd/MM/yyyy")</td>
                                 <td>@(item.Description ?? "Sans description")</td>
                                 <td>
@@ -161,10 +175,12 @@
                                         <span class="text-muted">Sans catégorie</span>
                                     }
                                 </td>
-                                <td class="text-end">
-                                    <a class="btn btn-sm btn-info" asp-action="Details" asp-route-id="@item.TransactionId">Détails</a>
-                                    <a class="btn btn-sm btn-secondary" asp-action="Edit" asp-route-id="@item.TransactionId">Modifier</a>
-                                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.TransactionId">Supprimer</a>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center flex-wrap gap-1">
+                                        <a class="btn btn-sm btn-info text-white" asp-action="Details" asp-route-id="@item.TransactionId" title="Détails"><i class="bi bi-eye"></i></a>
+                                        <a class="btn btn-sm btn-secondary" asp-action="Edit" asp-route-id="@item.TransactionId" title="Modifier"><i class="bi bi-pencil"></i></a>
+                                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.TransactionId" title="Supprimer"><i class="bi bi-trash"></i></a>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -180,6 +196,75 @@
 </div>
 
 @section Scripts {
+    <!-- jsPDF and AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        function toggleAll(source) {
+            checkboxes = document.querySelectorAll('.transaction-checkbox');
+            for(var i=0, n=checkboxes.length;i<n;i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Collect Data
+            const rows = [];
+            const checkboxes = document.querySelectorAll('.transaction-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                alert("Veuillez sélectionner au moins une transaction.");
+                return;
+            }
+
+            checkboxes.forEach(chk => {
+                const tr = chk.closest('tr');
+                const cells = tr.querySelectorAll('td');
+                // Skip the checkbox cell (index 0) and Actions cell (last index)
+                const rowData = [
+                    cells[1].innerText, // Date
+                    cells[2].innerText, // Description
+                    cells[3].innerText, // Type
+                    cells[4].innerText, // Montant
+                    cells[5].innerText  // Categorie
+                ];
+                rows.push(rowData);
+            });
+
+            // Add Header
+            doc.setFontSize(18);
+            doc.setTextColor(33, 137, 126); // Dark Cyan
+            doc.text("Rapport de Transactions - Chouette Finance", 14, 22);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            doc.text(`Généré le: ${new Date().toLocaleDateString()}`, 14, 30);
+
+            // Generate Table
+            doc.autoTable({
+                head: [['Date', 'Description', 'Type', 'Montant', 'Catégorie']],
+                body: rows,
+                startY: 40,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [33, 137, 126], // Dark Cyan (Blue-ish Teal) as requested
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    textColor: 50 // Normal color for body
+                },
+                alternateRowStyles: {
+                    fillColor: [240, 248, 255] // Very light blue for alternate rows
+                }
+            });
+
+            doc.save('transactions_chouette_finance.pdf');
+        }
+    </script>
     @if (Model.CategoryBreakdown != null && Model.CategoryBreakdown.Any())
     {
         <script>

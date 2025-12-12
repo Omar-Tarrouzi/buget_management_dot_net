@@ -35,6 +35,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 // Ajouter Razor Pages (nécessaire pour Identity)
 builder.Services.AddRazorPages();
 
+// Services personnalisés
+builder.Services.AddScoped<App_de_gestion_de_buget_version2.Services.CsvService>();
+
 // Configuration de l'authentification des cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {

@@ -3,22 +3,28 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - App_de_gestion_de_buget_version2</title>
+    <title>@ViewData["Title"] - Chouette Finance</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/App_de_gestion_de_buget_version2.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 <body>
+    <div id="particle-container"></div>
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">App_de_gestion_de_buget_version2</a>
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="Logo" style="height: 40px; width: auto; filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));" />
+                    Chouette Finance
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                        
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Wallet" asp-action="Index">Home</a>
                         </li>
@@ -31,7 +37,7 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Budget" asp-action="Index">Budget</a>
                         </li>
-                        <li class="nav-item">
+                            <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Report" asp-action="MonthlySummary">Reports</a>
                         </li>
                     </ul>
@@ -58,6 +64,43 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('particle-container');
+            const particleCount = 150; // Don't be shy!
+            const symbols = ['$', '$', '$', '$$', '€', '£', '¥', '€', '$']; // Money money money!
+            const colors = ['rgba(33, 137, 126, 0.4)', 'rgba(59, 169, 156, 0.4)', 'rgba(126, 188, 230, 0.4)', 'rgba(137, 128, 245, 0.4)', 'rgba(16, 185, 129, 0.5)'];
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random Content
+                particle.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+                
+                // Random Position
+                particle.style.left = Math.random() * 100 + 'vw';
+                
+                // Random Animation
+                const duration = Math.random() * 20 + 10; // 10-30s
+                const delay = Math.random() * -20; // Start immediately at different cycles
+                particle.style.animationDuration = duration + 's';
+                particle.style.animationDelay = delay + 's';
+                
+                // Random Size - slightly bigger for dollar signs
+                const size = Math.random() * 2 + 0.8; // 0.8rem - 2.8rem
+                particle.style.fontSize = size + 'rem';
+                particle.style.fontWeight = 'bold'; // Make them pop
+
+                // Random Color
+                particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                container.appendChild(particle);
+            }
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Import / Export Data";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-5 display-4 fw-bold">Data Management</h1>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Export Section -->
+        <div class="col-md-6">
+            <div class="card shadow-lg h-100 border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="card-title m-0"><i class="bi bi-cloud-download"></i> Export Data</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">Select the type of data you wish to export to CSV format.</p>
+                    
+                    <form asp-action="Export" method="post" class="d-grid gap-3">
+                        <button type="submit" name="entityType" value="transaction" class="btn btn-outline-primary btn-lg text-start">
+                            <span class="fw-bold">Transactions</span> <small class="text-muted d-block">Export all your income and expenses.</small>
+                        </button>
+                        <button type="submit" name="entityType" value="category" class="btn btn-outline-secondary btn-lg text-start">
+                             <span class="fw-bold">Categories</span> <small class="text-muted d-block">Export your custom categories.</small>
+                        </button>
+                        <button type="submit" name="entityType" value="wallet" class="btn btn-outline-secondary btn-lg text-start">
+                             <span class="fw-bold">Wallets</span> <small class="text-muted d-block">Export wallet balances and details.</small>
+                        </button>
+                         <button type="submit" name="entityType" value="budget" class="btn btn-outline-secondary btn-lg text-start">
+                             <span class="fw-bold">Budgets</span> <small class="text-muted d-block">Export your budget plans.</small>
+                        </button>
+                         <button type="submit" name="entityType" value="goal" class="btn btn-outline-secondary btn-lg text-start">
+                             <span class="fw-bold">Goals</span> <small class="text-muted d-block">Export your saving goals.</small>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Section -->
+        <div class="col-md-6">
+            <div class="card shadow-lg h-100 border-0">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h3 class="card-title m-0"><i class="bi bi-cloud-upload"></i> Import Data</h3>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted mb-4">Upload a CSV file to import data. Ensure the headers match the database schema.</p>
+
+                    <form asp-action="Import" method="post" enctype="multipart/form-data" class="needs-validation">
+                        <div class="mb-4">
+                            <label for="entityType" class="form-label fw-bold">Select Data Type</label>
+                            <select name="entityType" id="entityType" class="form-select form-select-lg" required>
+                                <option value="" selected disabled>Choose type...</option>
+                                <option value="transaction">Transactions</option>
+                                <option value="category">Categories</option>
+                                <option value="wallet">Wallets</option>
+                                <option value="budget">Budgets</option>
+                                <option value="goal">Goals</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="file" class="form-label fw-bold">Upload CSV File</label>
+                            <input type="file" name="file" id="file" class="form-control form-control-lg" accept=".csv" required />
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">Import Data</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
