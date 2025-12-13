@@ -16,6 +16,7 @@ namespace App_de_gestion_de_buget_version2.Models
         // User navigation removed for Mongo separation
         // public IdentityUser User { get; set; } = null!;
 
+        [BsonIgnore]
         public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     }
 }

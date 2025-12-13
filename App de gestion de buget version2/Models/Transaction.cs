@@ -25,7 +25,9 @@ namespace App_de_gestion_de_buget_version2.Models
         // Type de transaction : revenu ou dépense
         public TransactionType Type { get; set; }
 
+        [BsonIgnore]
         public virtual Category? Category { get; set; }
+        [BsonIgnore]
         public virtual Wallet Wallet { get; set; } = null!;
     }
 }
