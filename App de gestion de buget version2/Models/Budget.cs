@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Identity;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace App_de_gestion_de_buget_version2.Models
 {
     public class Budget
     {
-        public int BudgetId { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? BudgetId { get; set; }
 
         public int Year { get; set; }
         public int Month { get; set; }
@@ -13,8 +17,7 @@ namespace App_de_gestion_de_buget_version2.Models
 
         // RELATION UTILISATEUR
         public string UserId { get; set; } = null!;
-        public IdentityUser User { get; set; } = null!;
+        // User navigation removed for Mongo separation
+        // public IdentityUser User { get; set; } = null!;
     }
 }
-
-

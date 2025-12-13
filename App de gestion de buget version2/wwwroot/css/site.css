@@ -91,6 +91,30 @@ h6,
 .navbar-brand {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
+  color: var(--dark-cyan);
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, var(--dark-cyan), #546E7A);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: inline-block;
+}
+
+/* Decorative underline for main titles */
+h2::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(to right, var(--ocean-mist), transparent);
+  border-radius: 2px;
+  margin-top: 5px;
 }
 
 /* Navbar (Holographic Glass) */
@@ -113,6 +137,7 @@ h6,
   background: linear-gradient(45deg, var(--dark-cyan), var(--soft-periwinkle), var(--ocean-mist));
   background-size: 200% auto;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 
   text-shadow: none;
@@ -168,50 +193,87 @@ h6,
 /* Snazzy Cards (Frosty Holographic) - Color Coordinated */
 .card,
 .dashboard-card {
-  /* Gradient coordinated with Dark Cyan/Ocean Mist */
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(220, 245, 242, 0.85) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.9);
-  border-left: 1px solid rgba(255, 255, 255, 0.9);
-  border-right: 1px solid rgba(255, 255, 255, 0.4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  position: relative;
+  /* Needed for pseudo-elements */
+  background: rgba(255, 255, 255, 0.85);
+  /* Slightly more opaque for better contrast */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  /* Subtle border */
   border-radius: var(--border-radius);
-  /* Shadow starts on the LEFT (-10px) */
-  box-shadow: -10px 10px 20px rgba(33, 137, 126, 0.1);
-  transition: var(--transition);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+  /* Deeper shadow */
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Bouncier transition */
+  z-index: 1;
+}
+
+/* Money Particle Effect */
+.money-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  font-weight: bold;
+  font-family: 'Space Grotesk', sans-serif;
+  animation: moneyFloat 1s forwards;
+  user-select: none;
+}
+
+@keyframes moneyFloat {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-50px) scale(1.5);
+  }
+}
+
+.golden-balance {
+  background: linear-gradient(45deg, #FFD700, #FDB931, #FFD700);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800 !important;
+  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
+  transition: all 0.5s ease;
 }
 
 .card:hover,
 .dashboard-card:hover {
-  transform: translateY(-5px) scale(1.005);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(200, 235, 230, 0.9) 100%);
-
-  /* Shadow moves to the RIGHT (10px) - "Other side" animation */
-  box-shadow: 10px 20px 30px rgba(33, 137, 126, 0.25);
-
-  border-color: rgba(255, 255, 255, 1);
+  transform: translateY(-8px);
+  /* Higher lift */
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
+  /* Stronger shadow */
+  border-color: rgba(255, 255, 255, 0.9);
 }
 
 .card-header {
-  background: linear-gradient(to right, rgba(59, 169, 156, 0.1), transparent);
-  border-bottom: 1px solid rgba(33, 137, 126, 0.1);
+  background: transparent;
+  /* Cleaner look */
+  border-bottom: 1px solid rgba(33, 137, 126, 0.05);
   color: var(--dark-cyan);
   font-weight: 700;
   padding: 1.5rem;
   position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.9rem;
 }
 
 .card-header::after {
   content: '';
   position: absolute;
   bottom: -1px;
-  left: 0;
-  width: 50px;
-  /* Accent line */
+  left: 1.5rem;
+  /* Align efficiently */
+  width: 40px;
   height: 3px;
-  background: var(--dark-cyan);
-  border-radius: 0 3px 3px 0;
+  background: linear-gradient(to right, var(--ocean-mist), transparent);
+  border-radius: 3px;
 }
 
 /* Dashboard */
@@ -228,26 +290,31 @@ h6,
 .dashboard-card::before {
   content: '';
   position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 100px;
-  height: 100px;
-  background: radial-gradient(circle, rgba(105, 209, 197, 0.2) 0%, transparent 70%);
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  /* Larger */
+  height: 140px;
+  background: radial-gradient(circle, rgba(105, 209, 197, 0.15) 0%, transparent 70%);
   border-radius: 50%;
   transition: var(--transition);
 }
 
 .dashboard-card:hover::before {
-  transform: scale(1.5);
+  transform: scale(1.2);
 }
 
 .dashboard-card h3 {
   text-transform: uppercase;
-  font-size: 0.8rem;
-  letter-spacing: 0.15em;
-  color: #546E7A;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: #78909C;
+  /* Softer gray-blue */
   z-index: 2;
   margin-bottom: 0.5rem;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 .dashboard-card .value {
@@ -258,6 +325,7 @@ h6,
   /* Gradient Text ! */
   background: linear-gradient(45deg, var(--dark-cyan), var(--soft-periwinkle));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -387,11 +455,22 @@ h6,
 }
 
 .bg-success {
+  background-color: var(--ocean-mist) !important;
+  color: white;
+}
+
+.bg-danger {
+  background-color: #EF4444 !important;
+  color: white;
+}
+
+/* Soft backgrounds for badges */
+.badge.bg-success {
   background: rgba(59, 169, 156, 0.2) !important;
   color: #004D40;
 }
 
-.bg-danger {
+.badge.bg-danger {
   background: rgba(239, 68, 68, 0.2) !important;
   color: #7F1D1D;
 }

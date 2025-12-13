@@ -120,19 +120,44 @@
                                 @foreach (var item in Model.CategoryBreakdown.OrderByDescending(x => x.Total))
                                 {
                                     var percentage = totalExpenses > 0 ? (item.Total / totalExpenses) * 100 : 0;
+                                    var limitPercent = item.Limit.HasValue && item.Limit.Value > 0 ? (item.Total / item.Limit.Value) * 100 : 0;
+                                    
                                     <tr>
-                                        <td><strong>@item.CategoryName</strong></td>
+                                        <td>
+                                            <strong>@item.CategoryName</strong>
+                                            @if(item.Limit.HasValue) 
+                                            {
+                                                <div class="small text-muted">Limite: @item.Limit.Value.ToString("C")</div>
+                                            }
+                                        </td>
                                         <td>@item.Total.ToString("C")</td>
                                         <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                                            <div class="d-flex align-items-center mb-1">
+                                                <div class="progress flex-grow-1 me-2" style="height: 8px;">
                                                     <div class="progress-bar" 
                                                          style="width: @percentage%"
-                                                         role="progressbar">
+                                                         role="progressbar"
+                                                         title="Part du total: @percentage.ToString("F1")%">
                                                     </div>
                                                 </div>
-                                                <span>@percentage.ToString("F1")%</span>
+                                                <span class="small text-muted">@percentage.ToString("F0")% global</span>
                                             </div>
+
+                                            @if (item.Limit.HasValue)
+                                            {
+                                                 <div class="d-flex align-items-center">
+                                                    <div class="progress flex-grow-1 me-2" style="height: 12px;">
+                                                        <div class="progress-bar @(item.Total > item.Limit.Value ? "bg-danger" : "bg-success")" 
+                                                             style="width: @(Math.Min(limitPercent, 100))%"
+                                                             role="progressbar"
+                                                             title="Utilisation limite: @limitPercent.ToString("F1")%">
+                                                        </div>
+                                                    </div>
+                                                    <span class="small font-weight-bold @(item.Total > item.Limit.Value ? "text-danger" : "text-success")">
+                                                        @limitPercent.ToString("F0")%
+                                                    </span>
+                                                </div>
+                                            }
                                         </td>
                                     </tr>
                                 }

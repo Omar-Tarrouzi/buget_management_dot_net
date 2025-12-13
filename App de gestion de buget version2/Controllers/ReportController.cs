@@ -40,30 +40,43 @@ namespace App_de_gestion_de_buget_version2.Controllers
             var budget = _context.Budgets
                 .FirstOrDefault(b => b.UserId == userId && b.Year == y && b.Month == m);
 
-            var salaries = _context.Salaries
-                .Include(s => s.Wallet)
-                .Where(s => s.Wallet.UserId == userId &&
+            var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == userId);
+            if (wallet == null)
+            {
+                return View(new MonthlyBudgetSummaryViewModel
+                {
+                    Year = y,
+                    Month = m,
+                    PlannedAmount = 0m,
+                    Incomes = 0m,
+                    Expenses = 0m
+                });
+            }
+
+            var salariesList = _context.Salaries
+                .Where(s => s.WalletId == wallet.WalletId &&
                             s.Payday.Year == y &&
                             s.Payday.Month == m)
-                .Sum(s => (decimal?)s.Montant) ?? 0m;
+                .ToList();
+            var salaries = salariesList.Sum(s => s.Montant);
 
-            var variableIncomes = _context.Transactions
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId &&
+            var variableIncomesList = _context.Transactions
+                .Where(t => t.WalletId == wallet.WalletId &&
                             t.Type == TransactionType.Income &&
                             t.Date.HasValue &&
                             t.Date.Value.Year == y &&
                             t.Date.Value.Month == m)
-                .Sum(t => (decimal?)t.Montant) ?? 0m;
+                .ToList();
+            var variableIncomes = variableIncomesList.Sum(t => t.Montant);
 
-            var expenses = _context.Transactions
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId &&
+            var expensesList = _context.Transactions
+                .Where(t => t.WalletId == wallet.WalletId &&
                             t.Type == TransactionType.Expense &&
                             t.Date.HasValue &&
                             t.Date.Value.Year == y &&
                             t.Date.Value.Month == m)
-                .Sum(t => (decimal?)t.Montant) ?? 0m;
+                .ToList();
+            var expenses = expensesList.Sum(t => t.Montant);
 
             var vm = new MonthlyBudgetSummaryViewModel
             {
@@ -86,14 +99,38 @@ namespace App_de_gestion_de_buget_version2.Controllers
             int y = year ?? now.Year;
             int m = month ?? now.Month;
 
-            var items = _context.Transactions
-                .Include(t => t.Category)
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId &&
+            var wallet2 = _context.Wallets.FirstOrDefault(w => w.UserId == userId);
+            if (wallet2 == null)
+            {
+                return View(new CategoryBreakdownViewModel
+                {
+                    Year = y,
+                    Month = m,
+                    Items = new List<CategoryBreakdownItem>()
+                });
+            }
+
+            var transactions = _context.Transactions
+                .Where(t => t.WalletId == wallet2.WalletId &&
                             t.Type == TransactionType.Expense &&
                             t.Date.HasValue &&
                             t.Date.Value.Year == y &&
                             t.Date.Value.Month == m)
+                .ToList();
+
+            // Manually load categories
+            var categoryIds = transactions.Where(t => t.CategoryId != null).Select(t => t.CategoryId).Distinct().ToList();
+            var categories = _context.Categories.Where(c => categoryIds.Contains(c.CategoryId)).ToList();
+            
+            foreach (var transaction in transactions)
+            {
+                if (transaction.CategoryId != null)
+                {
+                    transaction.Category = categories.FirstOrDefault(c => c.CategoryId == transaction.CategoryId);
+                }
+            }
+
+            var items = transactions
                 .GroupBy(t => t.Category != null ? t.Category.Nom : "Sans catégorie")
                 .Select(g => new CategoryBreakdownItem
                 {

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using MongoDB.Bson;
 
 namespace App_de_gestion_de_buget_version2.Controllers
 {
@@ -48,30 +49,30 @@ namespace App_de_gestion_de_buget_version2.Controllers
 
             // Calculate current month expenses
             var currentMonthExpenses = _context.Transactions
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId &&
+                .Where(t => t.WalletId == wallet.WalletId &&
                             t.Type == TransactionType.Expense &&
                             t.Date.HasValue &&
                             t.Date.Value.Year == currentYear &&
                             t.Date.Value.Month == currentMonth)
-                .Sum(t => (decimal?)t.Montant) ?? 0m;
+                .ToList()
+                .Sum(t => t.Montant);
 
             // Calculate current month incomes
             var salaries = _context.Salaries
-                .Include(s => s.Wallet)
-                .Where(s => s.Wallet.UserId == userId &&
+                .Where(s => s.WalletId == wallet.WalletId &&
                             s.Payday.Year == currentYear &&
                             s.Payday.Month == currentMonth)
-                .Sum(s => (decimal?)s.Montant) ?? 0m;
+                .ToList()
+                .Sum(s => s.Montant);
 
             var variableIncomes = _context.Transactions
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId &&
+                .Where(t => t.WalletId == wallet.WalletId &&
                             t.Type == TransactionType.Income &&
                             t.Date.HasValue &&
                             t.Date.Value.Year == currentYear &&
                             t.Date.Value.Month == currentMonth)
-                .Sum(t => (decimal?)t.Montant) ?? 0m;
+                .ToList()
+                .Sum(t => t.Montant);
 
             var currentMonthIncomes = salaries + variableIncomes;
 
@@ -111,13 +112,13 @@ namespace App_de_gestion_de_buget_version2.Controllers
             foreach (var budget in allBudgets)
             {
                 var monthExpenses = _context.Transactions
-                    .Include(t => t.Wallet)
-                    .Where(t => t.Wallet.UserId == userId &&
+                    .Where(t => t.WalletId == wallet.WalletId &&
                                 t.Type == TransactionType.Expense &&
                                 t.Date.HasValue &&
                                 t.Date.Value.Year == budget.Year &&
                                 t.Date.Value.Month == budget.Month)
-                    .Sum(t => (decimal?)t.Montant) ?? 0m;
+                    .ToList()
+                    .Sum(t => t.Montant);
 
                 if (monthExpenses > budget.PlannedAmount)
                 {
@@ -126,14 +127,27 @@ namespace App_de_gestion_de_buget_version2.Controllers
             }
 
             // Calculate category breakdown for current month expenses
-            var categoryBreakdown = _context.Transactions
-                .Include(t => t.Category)
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId &&
+            var currentMonthTransactions = _context.Transactions
+                .Where(t => t.WalletId == wallet.WalletId &&
                             t.Type == TransactionType.Expense &&
                             t.Date.HasValue &&
                             t.Date.Value.Year == currentYear &&
                             t.Date.Value.Month == currentMonth)
+                .ToList();
+
+            // Manually load categories
+            var categoryIds = currentMonthTransactions.Where(t => t.CategoryId != null).Select(t => t.CategoryId).Distinct().ToList();
+            var categories = _context.Categories.Where(c => categoryIds.Contains(c.CategoryId)).ToList();
+            
+            foreach (var transaction in currentMonthTransactions)
+            {
+                if (transaction.CategoryId != null)
+                {
+                    transaction.Category = categories.FirstOrDefault(c => c.CategoryId == transaction.CategoryId);
+                }
+            }
+
+            var categoryBreakdown = currentMonthTransactions
                 .GroupBy(t => t.Category != null ? t.Category.Nom : "Sans catégorie")
                 .Select(g => new CategoryBreakdownItem
                 {
@@ -212,6 +226,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                 try
                 {
                     wallet.UserId = userId;
+                    wallet.WalletId = ObjectId.GenerateNewId().ToString();
                     _context.Wallets.Add(wallet);
                     _context.SaveChanges();
                     return RedirectToAction(nameof(Index));
@@ -227,7 +242,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
         }
 
         // GET: /Wallet/Edit/5
-        public IActionResult Edit(int id)
+        public IActionResult Edit(string id)
         {
             var userId = GetUserId();
             var wallet = _context.Wallets.FirstOrDefault(w => w.WalletId == id && w.UserId == userId);
@@ -339,9 +354,17 @@ namespace App_de_gestion_de_buget_version2.Controllers
             {
                 // Get all category budgets for current month
                 var categoryBudgets = _context.CategoryBudgets
-                    .Include(cb => cb.Category)
                     .Where(cb => cb.UserId == userId && cb.Year == year && cb.Month == month)
                     .ToList();
+
+                // Manually load categories
+                var categoryIdsForBudget = categoryBudgets.Select(cb => cb.CategoryId).Distinct().ToList();
+                var categoriesForBudget = _context.Categories.Where(c => categoryIdsForBudget.Contains(c.CategoryId)).ToList();
+                
+                foreach (var categoryBudget in categoryBudgets)
+                {
+                    categoryBudget.Category = categoriesForBudget.FirstOrDefault(c => c.CategoryId == categoryBudget.CategoryId);
+                }
 
                 foreach (var categoryBudget in categoryBudgets)
                 {

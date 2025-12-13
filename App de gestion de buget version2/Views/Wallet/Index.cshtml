@@ -28,7 +28,9 @@ else
                         <div class="row align-items-center">
                             <div class="col-md-8">
                                 <h3 class="mb-2">Solde actuel</h3>
-                                <div class="value" style="font-size: 3rem; color: @((wallet.Balance ?? 0) >= 0 ? "var(--success-color)" : "var(--danger-color)");">
+                                <div class="value animate-balance golden-balance" 
+                                     data-value="@((wallet.Balance ?? 0).ToString("N2", System.Globalization.CultureInfo.InvariantCulture))"
+                                     style="font-size: 3rem;">
                                     @((wallet.Balance ?? 0).ToString("C"))
                                 </div>
                             </div>

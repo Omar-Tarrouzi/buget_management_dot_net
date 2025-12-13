@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using MongoDB.Bson;
 
 namespace App_de_gestion_de_buget_version2.Controllers
 {
@@ -29,7 +30,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
             return userId;
         }
 
-        private void PopulateCategories(string userId, int? selectedCategoryId = null)
+        private void PopulateCategories(string userId, string? selectedCategoryId = null)
         {
             var categories = _context.Categories
                                      .Where(c => c.UserId == userId)
@@ -43,12 +44,38 @@ namespace App_de_gestion_de_buget_version2.Controllers
         {
             var userId = GetUserId();
 
+            // Get user's wallet first
+            var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == userId);
+            if (wallet == null)
+            {
+                return View(new TransactionIndexViewModel
+                {
+                    Transactions = new List<Transaction>(),
+                    CategoryBreakdown = new List<CategoryBreakdownItem>(),
+                    TotalExpenses = 0,
+                    TotalIncomes = 0
+                });
+            }
+
+            // Get transactions for this wallet
             var transactions = _context.Transactions
-                .Include(t => t.Category)
-                .Include(t => t.Wallet)
-                .Where(t => t.Wallet.UserId == userId)
+                .Where(t => t.WalletId == wallet.WalletId)
                 .OrderByDescending(t => t.Date)
                 .ToList();
+
+            // Manually load categories
+            var categoryIds = transactions.Where(t => t.CategoryId != null).Select(t => t.CategoryId).Distinct().ToList();
+            var categories = _context.Categories.Where(c => categoryIds.Contains(c.CategoryId)).ToList();
+            
+            // Assign navigation properties
+            foreach (var transaction in transactions)
+            {
+                transaction.Wallet = wallet;
+                if (transaction.CategoryId != null)
+                {
+                    transaction.Category = categories.FirstOrDefault(c => c.CategoryId == transaction.CategoryId);
+                }
+            }
 
             // Calculate category breakdown for expenses
             var categoryBreakdown = transactions
@@ -82,17 +109,26 @@ namespace App_de_gestion_de_buget_version2.Controllers
         }
 
         // GET: /Transaction/Details/5
-        public IActionResult Details(int id)
+        public IActionResult Details(string id)
         {
             var userId = GetUserId();
 
-            var transaction = _context.Transactions
-                .Include(t => t.Category)
-                .Include(t => t.Wallet)
-                .FirstOrDefault(t => t.TransactionId == id && t.Wallet.UserId == userId);
-
+            var transaction = _context.Transactions.FirstOrDefault(t => t.TransactionId == id);
             if (transaction == null)
                 return NotFound();
+
+            // Manually load wallet and verify ownership
+            var wallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transaction.WalletId);
+            if (wallet == null || wallet.UserId != userId)
+                return NotFound();
+
+            transaction.Wallet = wallet;
+
+            // Manually load category if exists
+            if (transaction.CategoryId != null)
+            {
+                transaction.Category = _context.Categories.FirstOrDefault(c => c.CategoryId == transaction.CategoryId);
+            }
 
             return View(transaction);
         }
@@ -119,6 +155,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
         {
             // Remove navigation properties from validation
             ModelState.Remove("Wallet");
+            ModelState.Remove("WalletId"); // Manually assigned below
             ModelState.Remove("Category");
             ModelState.Remove("Wallet.Balance");
 
@@ -144,6 +181,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                     }
 
                     // Affecter le wallet
+                    transaction.TransactionId = ObjectId.GenerateNewId().ToString();
                     _context.Transactions.Add(transaction);
 
                     // Mettre à jour le solde en fonction du type
@@ -163,7 +201,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error creating transaction");
-                    ModelState.AddModelError(string.Empty, "An error occurred while saving the transaction.");
+                    ModelState.AddModelError(string.Empty, $"An error occurred while saving the transaction: {ex.Message} {(ex.InnerException != null ? " - " + ex.InnerException.Message : "")}");
                 }
             }
 
@@ -172,16 +210,20 @@ namespace App_de_gestion_de_buget_version2.Controllers
         }
 
         // GET: /Transaction/Edit/5
-        public IActionResult Edit(int id)
+        public IActionResult Edit(string id)
         {
             var userId = GetUserId();
 
-            var transaction = _context.Transactions
-                .Include(t => t.Wallet)
-                .FirstOrDefault(t => t.TransactionId == id && t.Wallet.UserId == userId);
-
+            var transaction = _context.Transactions.FirstOrDefault(t => t.TransactionId == id);
             if (transaction == null)
                 return NotFound();
+
+            // Manually load wallet and verify ownership
+            var wallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transaction.WalletId);
+            if (wallet == null || wallet.UserId != userId)
+                return NotFound();
+
+            transaction.Wallet = wallet;
 
             PopulateCategories(userId, transaction.CategoryId);
             return View(transaction);
@@ -193,17 +235,22 @@ namespace App_de_gestion_de_buget_version2.Controllers
         public IActionResult Edit(Transaction input)
         {
             ModelState.Remove("Wallet");
+            ModelState.Remove("WalletId"); // Manually assigned/verified
             ModelState.Remove("Category");
             ModelState.Remove("Wallet.Balance");
 
             var userId = GetUserId();
 
-            var transaction = _context.Transactions
-                .Include(t => t.Wallet)
-                .FirstOrDefault(t => t.TransactionId == input.TransactionId && t.Wallet.UserId == userId);
-
+            var transaction = _context.Transactions.FirstOrDefault(t => t.TransactionId == input.TransactionId);
             if (transaction == null)
                 return NotFound();
+
+            // Manually load wallet and verify ownership
+            var wallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transaction.WalletId);
+            if (wallet == null || wallet.UserId != userId)
+                return NotFound();
+
+            transaction.Wallet = wallet;
 
             if (ModelState.IsValid)
             {
@@ -258,31 +305,46 @@ namespace App_de_gestion_de_buget_version2.Controllers
         }
 
         // GET: /Transaction/Delete/5
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
             var userId = GetUserId();
 
-            var transaction = _context.Transactions
-                .Include(t => t.Category)
-                .Include(t => t.Wallet)
-                .FirstOrDefault(t => t.TransactionId == id && t.Wallet.UserId == userId);
-
+            var transaction = _context.Transactions.FirstOrDefault(t => t.TransactionId == id);
             if (transaction == null)
                 return NotFound();
+
+            // Manually load wallet and verify ownership
+            var wallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transaction.WalletId);
+            if (wallet == null || wallet.UserId != userId)
+                return NotFound();
+
+            transaction.Wallet = wallet;
+
+            // Manually load category if exists
+            if (transaction.CategoryId != null)
+            {
+                transaction.Category = _context.Categories.FirstOrDefault(c => c.CategoryId == transaction.CategoryId);
+            }
 
             return View(transaction);
         }
 
-        // POST: /Transaction/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(string id)
         {
             var userId = GetUserId();
 
-            var transaction = _context.Transactions
-                .Include(t => t.Wallet)
-                .FirstOrDefault(t => t.TransactionId == id && t.Wallet.UserId == userId);
+            var transaction = _context.Transactions.FirstOrDefault(t => t.TransactionId == id);
+            if (transaction == null)
+                return NotFound();
+
+            // Manually load wallet and verify ownership
+            var wallet = _context.Wallets.FirstOrDefault(w => w.WalletId == transaction.WalletId);
+            if (wallet == null || wallet.UserId != userId)
+                return NotFound();
+
+            transaction.Wallet = wallet;
 
             if (transaction == null)
                 return NotFound();

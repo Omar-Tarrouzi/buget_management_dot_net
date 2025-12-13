@@ -4,6 +4,7 @@ namespace App_de_gestion_de_buget_version2.Models.ViewModels
     {
         public string CategoryName { get; set; } = string.Empty;
         public decimal Total { get; set; }
+        public decimal? Limit { get; set; }
     }
 
     public class CategoryBreakdownViewModel

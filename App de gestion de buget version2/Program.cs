@@ -3,15 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System.Linq;
+using MongoDB.Bson;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
 
-// Configuration de la base de données
+// Configuration de la base de données MongoDB
+var mongoConnectionString = builder.Configuration.GetConnectionString("BudgetDB") ?? "mongodb://localhost:27017";
+var mongoDbName = "BudgetDB";
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("BudgetDB"), sql => sql.EnableRetryOnFailure()));
+    options.UseMongoDB(mongoConnectionString, mongoDbName));
 
 // NOUVELLE CONFIGURATION IDENTITY
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
@@ -30,6 +34,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 // Enable the default Razor UI for Identity (provides /Identity/Account/Login, Register, etc.)
 .AddDefaultUI()
 .AddEntityFrameworkStores<ApplicationDbContext>()
+.AddUserStore<App_de_gestion_de_buget_version2.Data.CustomUserStore>()
 .AddDefaultTokenProviders();
 
 // Ajouter Razor Pages (nécessaire pour Identity)
@@ -58,18 +63,10 @@ using (var scope = app.Services.CreateScope())
 
         try
         {
-            // If there are any pending migrations apply them, otherwise ensure database is created from model
-            var pending = context.Database.GetPendingMigrations();
-            if (pending != null && pending.Any())
-            {
-                logger.LogInformation("Applying {Count} pending EF Core migrations.", pending.Count());
-                context.Database.Migrate();
-            }
-            else
-            {
-                logger.LogInformation("No pending migrations found - ensuring database is created.");
-                context.Database.EnsureCreated();
-            }
+            // MongoDB does not use migrations in the SQL sense.
+            // We just ensure the database/collections are created.
+            // context.Database.Migrate(); // Not supported by Mongo provider
+            context.Database.EnsureCreated();
         }
         catch (Exception migrateEx)
         {

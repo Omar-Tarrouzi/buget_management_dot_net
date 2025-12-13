@@ -1,4 +1,7 @@
-﻿namespace App_de_gestion_de_buget_version2.Models
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace App_de_gestion_de_buget_version2.Models
 {
     public enum TransactionType
     {
@@ -8,12 +11,16 @@
 
     public class Transaction
     {
-        public int TransactionId { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? TransactionId { get; set; }
         public DateTime? Date { get; set; }
         public string? Description { get; set; }
         public decimal Montant { get; set; }
-        public int WalletId { get; set; }
-        public int? CategoryId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string WalletId { get; set; } = null!;
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? CategoryId { get; set; }
 
         // Type de transaction : revenu ou dépense
         public TransactionType Type { get; set; }

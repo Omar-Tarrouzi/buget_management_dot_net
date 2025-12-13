@@ -5,6 +5,7 @@ using System.Security.Claims;
 using App_de_gestion_de_buget_version2.Data;
 using App_de_gestion_de_buget_version2.Models;
 using System.Linq;
+using MongoDB.Bson;
 
 namespace App_de_gestion_de_buget_version2.Controllers
 {
@@ -55,6 +56,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                 try
                 {
                     category.UserId = GetUserId();
+                    category.CategoryId = ObjectId.GenerateNewId().ToString();
                     _context.Categories.Add(category);
                     _context.SaveChanges();
                     return RedirectToAction("Index");
@@ -81,7 +83,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
         }
 
 
-        public IActionResult Edit(int id)
+        public IActionResult Edit(string id)
         {
             var userId = GetUserId();
             var category = _context.Categories
@@ -116,7 +118,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
             return View(category);
         }
 
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
             var userId = GetUserId();
             var category = _context.Categories
@@ -129,7 +131,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(string id)
         {
             var userId = GetUserId();
             var category = _context.Categories
