@@ -113,6 +113,14 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+var supportedCultures = new[] { "fr-FR" };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("fr-FR")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
+app.UseRequestLocalization(localizationOptions);
+
 app.UseRouting();
 
 // MIDDLEWARE CRITIQUE

@@ -97,9 +97,11 @@ namespace App_de_gestion_de_buget_version2.Controllers
                 budgetHealthStatus = "danger";
 
             // Calculate savings rate
-            var savingsRate = currentMonthIncomes > 0 
-                ? ((currentMonthIncomes - currentMonthExpenses) / currentMonthIncomes) * 100 
-                : 0;
+            decimal savingsRate = 0;
+            if (currentMonthIncomes > 0)
+            {
+                savingsRate = ((currentMonthIncomes - currentMonthExpenses) / currentMonthIncomes) * 100m;
+            }
 
             // Count months with budgets and months over budget
             var allBudgets = _context.Budgets

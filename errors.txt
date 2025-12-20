@@ -1,0 +1,11 @@
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Program.cs(75,46): error CS8641: 'else' ne peut pas démarrer d'instruction. [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Program.cs(75,46): error CS1003: Erreur de syntaxe, '(' attendu [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Program.cs(75,46): error CS1525: Terme d'expression 'else' non valide [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Program.cs(75,46): error CS1026: ) attendue [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Program.cs(75,46): error CS1002: ; attendu [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+
+ÉCHEC de la build.
+    0 Avertissement(s)
+    5 Erreur(s)
+
+Temps écoulé 00:00:10.00

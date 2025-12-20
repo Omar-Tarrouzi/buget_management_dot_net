@@ -1,0 +1,8 @@
+﻿C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Controllers\DataExportController.cs(71,22): error CS1513: } attendue [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\Controllers\DataExportController.cs(84,27): error CS1003: Erreur de syntaxe, 'switch' attendu [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj]
+
+├ëCHEC de la build.
+    0 Avertissement(s)
+    2 Erreur(s)
+
+Temps ├®coul├® 00:00:19.18

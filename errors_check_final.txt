@@ -1,0 +1,9 @@
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj : error NU1605: Avertissement comme erreur : Passage à une version antérieure du package détecté : Microsoft.EntityFrameworkCore de 8.0.10 à 8.0.0. Référencez le package directement à partir du projet pour sélectionner une version différente.  [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2.sln]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj : error NU1605:  App de gestion de buget version2 -> MongoDB.EntityFrameworkCore 8.2.0 -> Microsoft.EntityFrameworkCore (>= 8.0.10)  [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2.sln]
+C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2\App de gestion de buget version2.csproj : error NU1605:  App de gestion de buget version2 -> Microsoft.EntityFrameworkCore (>= 8.0.0) [C:\Users\Mr Tarouzi\OneDrive\Bureau\4G12 2025 2026 cours\dot net\App de gestion de budget version 3\App de gestion de buget version2.sln]
+
+ÉCHEC de la build.
+    0 Avertissement(s)
+    1 Erreur(s)
+
+Temps écoulé 00:00:08.96

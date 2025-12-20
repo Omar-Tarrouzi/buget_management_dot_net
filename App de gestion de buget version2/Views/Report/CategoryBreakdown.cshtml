@@ -4,30 +4,72 @@
     ViewData["Title"] = "Répartition par catégorie";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="container-fluid py-4">
+    <div class="report-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>@ViewData["Title"]</h2>
+                <p class="text-muted mb-0">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    Période : @Model.Month / @Model.Year
+                </p>
+            </div>
+            <a class="btn btn-outline-purple" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-arrow-left me-2"></i>Retour au Wallet
+            </a>
+        </div>
+    </div>
 
-<p>Mois : @Model.Month / @Model.Year</p>
+    <div class="report-card p-4">
+        <div class="table-responsive">
+            <table class="table purple-table mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Catégorie</th>
+                        <th class="text-end pe-4">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">
+                            <span class="category-dot bg-purple me-2"></span>
+                            @item.CategoryName
+                        </td>
+                        <td class="text-end pe-4 fw-bold text-purple">
+                            @item.Total.ToString("C")
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Catégorie</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model.Items)
-    {
-        <tr>
-            <td>@item.CategoryName</td>
-            <td>@item.Total</td>
-        </tr>
+<style>
+    .btn-outline-purple {
+        color: var(--purple-primary);
+        border-color: var(--purple-primary);
+        border-width: 2px;
+        border-radius: 12px;
+        padding: 0.6rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s;
     }
-    </tbody>
-</table>
-
-<p>
-    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Retour</a>
-</p>
+    .btn-outline-purple:hover {
+        background: var(--purple-gradient);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+    }
+    .category-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+</style>
 
 

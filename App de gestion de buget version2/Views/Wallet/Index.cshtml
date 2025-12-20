@@ -29,7 +29,7 @@ else
                             <div class="col-md-8">
                                 <h3 class="mb-2">Solde actuel</h3>
                                 <div class="value animate-balance golden-balance" 
-                                     data-value="@((wallet.Balance ?? 0).ToString("N2", System.Globalization.CultureInfo.InvariantCulture))"
+                                     data-value="@((wallet.Balance ?? 0).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))"
                                      style="font-size: 3rem;">
                                     @((wallet.Balance ?? 0).ToString("C"))
                                 </div>
@@ -59,18 +59,14 @@ else
                 <div class="col-md-4 mb-3">
                     <div class="dashboard-card">
                         <h3>Santé du budget</h3>
-                        <div class="value mb-3">
+                        <div class="value mb-3 d-flex justify-content-center align-items-center" style="min-height: 160px;">
                             @if (Model.BudgetHealthStatus == "good")
                             {
-                                <span class="text-success" style="font-size: 3rem;">✓</span>
-                            }
-                            else if (Model.BudgetHealthStatus == "warning")
-                            {
-                                <span class="text-warning" style="font-size: 3rem;">⚠</span>
+                                <img src="~/images/gifdotnet1.gif" alt="Statut Excellent" class="img-fluid rounded" style="max-height: 150px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" />
                             }
                             else
                             {
-                                <span class="text-danger" style="font-size: 3rem;">✗</span>
+                                <img src="~/images/gifdotnet2.gif" alt="Statut Critique" class="img-fluid rounded" style="max-height: 150px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" />
                             }
                         </div>
                         <div class="indicator @Model.BudgetHealthStatus">
@@ -88,7 +84,7 @@ else
                             }
                         </div>
                         <p class="mt-3 mb-0 text-muted" style="font-size: 0.875rem;">
-                            Utilisation: @Model.BudgetUsagePercent.ToString("F1")%
+                            Utilisation : @Model.BudgetUsagePercent.ToString("F1")%
                         </p>
                     </div>
                 </div>
@@ -119,13 +115,19 @@ else
                 <!-- Savings Rate -->
                 <div class="col-md-4 mb-3">
                     <div class="dashboard-card">
-                        <h3>Taux d'épargne</h3>
+                        <h3>
+                            Taux d'épargne
+                            <span data-bs-toggle="tooltip" title="(Revenus - Dépenses) / Revenus * 100">
+                                <i class="bi bi-info-circle text-muted" style="font-size: 0.8em; cursor: help;"></i>
+                            </span>
+                        </h3>
                         <div class="value @(Model.SavingsRate >= 0 ? "text-success" : "text-danger")">
-                            @Model.SavingsRate.ToString("F1")%
+                            @Model.SavingsRate.ToString("F2")%
                         </div>
                         <p class="mt-3 mb-0 text-muted" style="font-size: 0.875rem;">
-                            Revenus: @Model.CurrentMonthIncomes.ToString("C")<br>
-                            Dépenses: @Model.CurrentMonthExpenses.ToString("C")
+                            <strong>@DateTime.Now.ToString("MMMM yyyy", new System.Globalization.CultureInfo("fr-FR")) :</strong><br />
+                            Revenus : @Model.CurrentMonthIncomes.ToString("C")<br>
+                            Dépenses : @Model.CurrentMonthExpenses.ToString("C")
                         </p>
                     </div>
                 </div>
@@ -298,53 +300,64 @@ else
                 <div class="row mb-4">
                     <div class="col-12">
                         <div class="card border-danger">
-                            <div class="card-header bg-danger text-white">
+                            <div class="card-header bg-danger text-white d-flex align-items-center justify-content-between">
                                 <h4 class="mb-0">⚠️ Alertes de dépassement de budget par catégorie</h4>
+                                <img src="~/images/gifdotnet2.gif" alt="Alert" style="height: 40px; width: auto; border-radius: 4px;" />
                             </div>
                             <div class="card-body">
                                 @foreach (var alert in Model.CategoryBudgetAlerts)
                                 {
-                                    <div class="alert alert-danger mb-3">
-                                        <h5 class="alert-heading">
-                                            <strong>@alert.CategoryName</strong> - Budget dépassé!
-                                        </h5>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <p class="mb-1">
-                                                    <strong>Budget alloué:</strong> @alert.BudgetAmount.ToString("C")
-                                                </p>
-                                                <p class="mb-1">
-                                                    <strong>Montant dépensé:</strong> @alert.SpentAmount.ToString("C")
-                                                </p>
+                                    <div class="alert alert-danger mb-3 d-flex gap-3 align-items-center">
+                                        <div class="flex-grow-1">
+                                            <h5 class="alert-heading">
+                                                <strong>@alert.CategoryName</strong> - Budget dépassé!
+                                            </h5>
+                                            <hr>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p class="mb-1">
+                                                        <strong>Budget alloué:</strong> @alert.BudgetAmount.ToString("C")
+                                                    </p>
+                                                    <p class="mb-1">
+                                                        <strong>Montant dépensé:</strong> @alert.SpentAmount.ToString("C")
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p class="mb-1">
+                                                        <strong>Dépassement:</strong> 
+                                                        <span class="text-danger fw-bold">@alert.OverAmount.ToString("C")</span>
+                                                    </p>
+                                                    <p class="mb-0">
+                                                        <strong>Pourcentage de dépassement:</strong> 
+                                                        <span class="text-danger fw-bold">@alert.OverPercentage.ToString("F1")%</span>
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <p class="mb-1">
-                                                    <strong>Dépassement:</strong> 
-                                                    <span class="text-danger fw-bold">@alert.OverAmount.ToString("C")</span>
-                                                </p>
-                                                <p class="mb-0">
-                                                    <strong>Pourcentage de dépassement:</strong> 
-                                                    <span class="text-danger fw-bold">@alert.OverPercentage.ToString("F1")%</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div class="mt-2">
-                                            <div class="progress" style="height: 25px;">
-                                                <div class="progress-bar bg-danger" 
-                                                     role="progressbar" 
-                                                     style="width: @((alert.SpentAmount / alert.BudgetAmount * 100))%"
-                                                     aria-valuenow="@alert.SpentAmount" 
-                                                     aria-valuemin="0" 
-                                                     aria-valuemax="@alert.BudgetAmount">
-                                                    @((alert.SpentAmount / alert.BudgetAmount * 100).ToString("F1"))%
+                                            <div class="mt-2">
+                                                <div class="progress" style="height: 25px;">
+                                                    <div class="progress-bar bg-danger" 
+                                                         role="progressbar" 
+                                                         style="width: @((alert.SpentAmount / alert.BudgetAmount * 100))%"
+                                                         aria-valuenow="@alert.SpentAmount" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="@alert.BudgetAmount">
+                                                        @((alert.SpentAmount / alert.BudgetAmount * 100).ToString("F1"))%
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="flex-shrink-0">
+                                            <img src="~/images/gifdotnet2.gif" alt="Critique" style="max-height: 80px; width: auto; border-radius: 8px;" />
+                                        </div>
                                     </div>
                                 }
-                                <div class="alert alert-warning mb-0">
-                                    <strong>⚠️ Attention:</strong> Votre statut de crédit est marqué comme "mauvais" car une ou plusieurs catégories ont dépassé leur budget alloué.
+                                <div class="alert alert-warning mb-0 d-flex gap-3 align-items-center">
+                                    <div class="flex-grow-1">
+                                        <strong>⚠️ Attention:</strong> Votre statut de crédit est marqué comme "mauvais" car une ou plusieurs catégories ont dépassé leur budget alloué.
+                                    </div>
+                                    <div class="flex-shrink-0">
+                                        <img src="~/images/gifdotnet2.gif" alt="Critique" style="max-height: 50px; width: auto; border-radius: 4px;" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -359,35 +372,49 @@ else
                         <div class="card-header">
                             Recommandations
                         </div>
-                        <div class="card-body">
-                            @if (Model.CategoryBudgetAlerts != null && Model.CategoryBudgetAlerts.Any())
-                            {
-                                <div class="alert alert-danger mb-3">
-                                    <strong>❌ Crédit mauvais!</strong> Une ou plusieurs catégories ont dépassé leur budget. 
-                                    Veuillez réduire vos dépenses dans ces catégories pour améliorer votre statut financier.
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-md-9">
+                                        @if (Model.CategoryBudgetAlerts != null && Model.CategoryBudgetAlerts.Any())
+                                        {
+                                            <div class="alert alert-danger mb-3">
+                                                <strong>❌ Crédit mauvais!</strong> Une ou plusieurs catégories ont dépassé leur budget. 
+                                                Veuillez réduire vos dépenses dans ces catégories pour améliorer votre statut financier.
+                                            </div>
+                                        }
+                                        @if (Model.BudgetHealthStatus == "good")
+                                        {
+                                            <div class="alert alert-success mb-0">
+                                                <strong>Excellent travail!</strong> Vous gérez bien votre budget ce mois-ci. Continuez ainsi!
+                                            </div>
+                                        }
+                                        else if (Model.BudgetHealthStatus == "warning")
+                                        {
+                                            <div class="alert alert-warning mb-0">
+                                                <strong>Attention:</strong> Vous avez utilisé @Model.BudgetUsagePercent.ToString("F1")% de votre budget. 
+                                                Essayez de réduire vos dépenses pour rester dans les limites.
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="alert alert-danger mb-0">
+                                                <strong>Budget dépassé!</strong> Vous avez dépassé votre budget de @((Model.CurrentMonthExpenses - Model.CurrentMonthBudget).ToString("C")). 
+                                                Considerez réviser vos dépenses et ajuster votre budget pour le mois prochain.
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-3 text-center">
+                                        @if (Model.BudgetHealthStatus == "good")
+                                        {
+                                            <img src="~/images/gifdotnet1.gif" alt="Success" class="img-fluid rounded" style="max-height: 120px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" />
+                                        }
+                                        else
+                                        {
+                                            <img src="~/images/gifdotnet2.gif" alt="Alert" class="img-fluid rounded" style="max-height: 120px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));" />
+                                        }
+                                    </div>
                                 </div>
-                            }
-                            @if (Model.BudgetHealthStatus == "good")
-                            {
-                                <div class="alert alert-success mb-0">
-                                    <strong>Excellent travail!</strong> Vous gérez bien votre budget ce mois-ci. Continuez ainsi!
-                                </div>
-                            }
-                            else if (Model.BudgetHealthStatus == "warning")
-                            {
-                                <div class="alert alert-warning mb-0">
-                                    <strong>Attention:</strong> Vous avez utilisé @Model.BudgetUsagePercent.ToString("F1")% de votre budget. 
-                                    Essayez de réduire vos dépenses pour rester dans les limites.
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="alert alert-danger mb-0">
-                                    <strong>Budget dépassé!</strong> Vous avez dépassé votre budget de @((Model.CurrentMonthExpenses - Model.CurrentMonthBudget).ToString("C")). 
-                                    Considérez réviser vos dépenses et ajuster votre budget pour le mois prochain.
-                                </div>
-                            }
-                        </div>
+                            </div>
                     </div>
                 </div>
             </div>
@@ -403,6 +430,12 @@ else
     @if (Model != null)
     {
         <script>
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+
             const totalExpenses = @((double)Model.CurrentMonthExpenses);
             const totalBudget = @((double)Model.CurrentMonthBudget);
             
