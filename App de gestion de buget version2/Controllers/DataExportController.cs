@@ -291,6 +291,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                         {
                             var t = new Transaction
                             {
+                                TransactionId = ObjectId.GenerateNewId().ToString(),
                                 Date = dto.Date,
                                 Description = dto.Description,
                                 Montant = dto.Montant
@@ -371,6 +372,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                             c.UserId = user.Id;
                             if (!_context.Categories.Any(cat => cat.UserId == user.Id && cat.Nom == c.Nom))
                             {
+                                if (string.IsNullOrEmpty(c.CategoryId)) c.CategoryId = ObjectId.GenerateNewId().ToString();
                                 _context.Categories.Add(c);
                             }
                         }
@@ -381,6 +383,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                         foreach (var w in wallets)
                         {
                             w.UserId = user.Id;
+                            if (string.IsNullOrEmpty(w.WalletId)) w.WalletId = ObjectId.GenerateNewId().ToString();
                             _context.Wallets.Add(w);
                         }
                         break;
@@ -390,6 +393,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                          foreach(var g in goals)
                          {
                              g.UserId = user.Id;
+                             if (string.IsNullOrEmpty(g.GoalId)) g.GoalId = ObjectId.GenerateNewId().ToString();
                              _context.Goals.Add(g);
                          }
                          break;
@@ -399,6 +403,7 @@ namespace App_de_gestion_de_buget_version2.Controllers
                          foreach(var b in budgets)
                          {
                              b.UserId = user.Id;
+                             if (string.IsNullOrEmpty(b.BudgetId)) b.BudgetId = ObjectId.GenerateNewId().ToString();
                              _context.Budgets.Add(b);
                          }
                          break;
